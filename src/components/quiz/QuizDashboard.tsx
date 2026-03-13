@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { BarChart3, RotateCcw, Trophy, Share2, Monitor, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import { db } from "@/lib/firebase";
+import { ref, set, remove } from "firebase/database";
 
 export default function QuizDashboard() {
   const { resetQuiz, groups, currentRound, currentSubRound, numRounds, numWinners, getRoundLeaderboard, getSubRoundLeaderboard, getLeaderboard } = useQuiz();
@@ -29,7 +31,7 @@ export default function QuizDashboard() {
       round,
       groups: lb.map((g) => ({ id: g.id, name: g.name, score: g.roundScore, rank: g.rank })),
     };
-    localStorage.setItem("quizmaster-display", JSON.stringify(data));
+    set(ref(db, "quiz-display"), data);
     toast.success(`Round ${round + 1} total sent to display!`);
   }, [getRoundLeaderboard]);
 
@@ -41,12 +43,12 @@ export default function QuizDashboard() {
       subRound,
       groups: lb.map((g) => ({ id: g.id, name: g.name, score: g.subRoundScore, rank: g.rank })),
     };
-    localStorage.setItem("quizmaster-display", JSON.stringify(data));
+    set(ref(db, "quiz-display"), data);
     toast.success(`Round ${round + 1} Sub-Round ${subRound + 1} sent to display!`);
   }, [getSubRoundLeaderboard]);
 
   const stopSharing = useCallback(() => {
-    localStorage.removeItem("quizmaster-display");
+    remove(ref(db, "quiz-display"));
     toast.info("Sharing stopped. Display is on standby.");
   }, []);
 
@@ -57,7 +59,7 @@ export default function QuizDashboard() {
       numWinners,
       groups: lb.map((g) => ({ id: g.id, name: g.name, score: g.total, rank: g.rank })),
     };
-    localStorage.setItem("quizmaster-display", JSON.stringify(data));
+    set(ref(db, "quiz-display"), data);
     toast.success("Final leaderboard sent to display!");
   }, [getLeaderboard, numWinners]);
 

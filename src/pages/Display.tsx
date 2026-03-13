@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, Medal, Award, Crown } from "lucide-react";
 import { WinnerCard } from "../components/quiz/FinalLeaderboard";
+import { db } from "@/lib/firebase";
+import { ref, onValue } from "firebase/database";
 
 interface DisplayData {
   type: "round" | "sub-round" | "final";
@@ -24,52 +26,19 @@ export default function Display() {
   const [data, setData] = useState<DisplayData | null>(null);
 
   useEffect(() => {
-    const handler = (e: StorageEvent) => {
-      if (e.key === "quizmaster-display") {
-        if (!e.newValue) {
-          setData(null);
-          return;
-        }
-        try {
-          setData(JSON.parse(e.newValue));
-        } catch {
-          // Ignore parsing errors
-        }
+    const displayRef = ref(db, "quiz-display");
+    
+    // Listen for real-time updates from Firebase
+    const unsubscribe = onValue(displayRef, (snapshot) => {
+      const val = snapshot.val();
+      if (val) {
+        setData(val);
+      } else {
+        setData(null);
       }
-    };
+    });
 
-    // Load initial
-    try {
-      const stored = localStorage.getItem("quizmaster-display");
-      if (stored) setData(JSON.parse(stored));
-      else setData(null);
-    } catch {
-      // Ignore initial load errors
-    }
-
-    window.addEventListener("storage", handler);
-    // Also poll for same-tab updates
-    const interval = setInterval(() => {
-      try {
-        const stored = localStorage.getItem("quizmaster-display");
-        if (!stored) {
-          setData(null);
-          return;
-        }
-        const parsed = JSON.parse(stored);
-        setData((prev) => {
-          if (JSON.stringify(prev) !== stored) return parsed;
-          return prev;
-        });
-      } catch {
-        // Ignore JSON parsing errors during poll
-      }
-    }, 1000);
-
-    return () => {
-      window.removeEventListener("storage", handler);
-      clearInterval(interval);
-    };
+    return () => unsubscribe();
   }, []);
 
   if (!data) {
