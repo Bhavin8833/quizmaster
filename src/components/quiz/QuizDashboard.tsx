@@ -12,7 +12,7 @@ export default function QuizDashboard() {
   const [showFinal, setShowFinal] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const displayUrl = `${window.location.origin}/display`;
+  const displayUrl = `${window.location.origin}${import.meta.env.BASE_URL === "/" ? "" : import.meta.env.BASE_URL}display`;
 
   const copyDisplayLink = useCallback(() => {
     navigator.clipboard.writeText(displayUrl).then(() => {
