@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, Medal, Award, Crown, PartyPopper, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import { db } from "@/lib/firebase";
+import { ref, set } from "firebase/database";
+
 const medalConfig = [
   { bg: "bg-gold/20", border: "border-gold", text: "text-gold", icon: Trophy, label: "🥇", title: "1st Place — Winner" },
   { bg: "bg-silver/20", border: "border-silver", text: "text-silver", icon: Medal, label: "🥈", title: "2nd Place" },
@@ -158,7 +161,7 @@ export default function FinalLeaderboard({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
-  // Sync state to display via localStorage
+  // Sync state to display via Firebase
   useEffect(() => {
     const data = {
       type: "final" as const,
@@ -168,7 +171,9 @@ export default function FinalLeaderboard({ onClose }: { onClose: () => void }) {
       revealedCount,
       showConfetti
     };
-    localStorage.setItem("quizmaster-display", JSON.stringify(data));
+    
+    set(ref(db, "quiz-display"), data)
+      .catch(err => console.error("Final Reveal Sync Error:", err));
   }, [phase, revealedCount, showConfetti, leaderboard, numWinners]);
 
   // Build revealed winners list (revealed from bottom rank to top)

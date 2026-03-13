@@ -87,6 +87,8 @@ export default function QuizDashboard() {
       type: "final" as const,
       numWinners,
       groups: lb.map((g) => ({ id: g.id, name: g.name, score: g.total, rank: g.rank })),
+      phase: "idle" as const,
+      revealedCount: 0,
     };
     set(ref(db, "quiz-display"), data)
       .then(() => {
