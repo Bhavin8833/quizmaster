@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuiz } from "@/context/QuizContext";
 import RoundScoring from "./RoundScoring";
 import FinalLeaderboard from "./FinalLeaderboard";
@@ -7,12 +7,20 @@ import { motion } from "framer-motion";
 import { BarChart3, RotateCcw, Trophy, Share2, Monitor, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/firebase";
-import { ref, set, remove } from "firebase/database";
+import { ref, set, remove, onValue } from "firebase/database";
 
 export default function QuizDashboard() {
   const { resetQuiz, groups, currentRound, currentSubRound, numRounds, numWinners, getRoundLeaderboard, getSubRoundLeaderboard, getLeaderboard } = useQuiz();
   const [showFinal, setShowFinal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const connectedRef = ref(db, ".info/connected");
+    onValue(connectedRef, (snap) => {
+      setIsConnected(snap.val() === true);
+    });
+  }, []);
 
   const displayUrl = `${window.location.origin}${import.meta.env.BASE_URL === "/" ? "" : import.meta.env.BASE_URL}display`;
 
@@ -106,6 +114,12 @@ export default function QuizDashboard() {
             <div className="flex flex-col">
               <span className="font-display font-bold text-xl leading-tight text-slate-900">QuizMaster Live</span>
               <span className="text-xs text-slate-500 font-medium leading-none mt-0.5">Host Dashboard</span>
+            </div>
+            <div className="ml-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-white shadow-sm">
+              <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`} />
+              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">
+                {isConnected ? "Cloud" : "Offline"}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-3">

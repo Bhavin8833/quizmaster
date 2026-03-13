@@ -24,6 +24,7 @@ const medalConfig = [
 
 export default function Display() {
   const [data, setData] = useState<DisplayData | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const displayRef = ref(db, "quiz-display");
@@ -31,7 +32,9 @@ export default function Display() {
 
     // Listen for connection status
     onValue(connectedRef, (snap) => {
-      if (snap.val() === true) {
+      const connected = snap.val() === true;
+      setIsConnected(connected);
+      if (connected) {
         console.log("Display: Connected to Firebase Realtime Database");
       } else {
         console.warn("Display: Disconnected from Firebase");
@@ -66,7 +69,13 @@ export default function Display() {
           </motion.div>
           <h1 className="text-4xl md:text-6xl font-display font-bold">QuizMaster Live</h1>
           <p className="text-xl text-muted-foreground">Waiting for host to share a view...</p>
-          <p className="text-sm text-muted-foreground">Keep this tab open on the projector</p>
+          <div className="flex items-center justify-center gap-2 pt-4">
+            <div className={`w-3 h-3 rounded-full ${isConnected ? "bg-green-500 animate-pulse" : "bg-red-500 border-2 border-red-300"}`} />
+            <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
+              {isConnected ? "Cloud Connected" : "Connection Error / Rules Needed"}
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground/60 pt-2">Keep this tab open on the projector</p>
         </div>
       </div>
     );
