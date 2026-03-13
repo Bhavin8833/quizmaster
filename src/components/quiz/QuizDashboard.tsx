@@ -107,7 +107,7 @@ export default function QuizDashboard() {
       {/* Top Bar */}
       <div className="sticky top-0 z-40 bg-[#f8f9fc] border-b border-border/40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3 w-56">
+          <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#eef0ff] border border-[#dce0ff] flex items-center justify-center">
               <Trophy className="w-5 h-5 text-[#544ee3]" />
             </div>
