@@ -31,8 +31,16 @@ export default function QuizDashboard() {
       round,
       groups: lb.map((g) => ({ id: g.id, name: g.name, score: g.roundScore, rank: g.rank })),
     };
-    set(ref(db, "quiz-display"), data);
-    toast.success(`Round ${round + 1} total sent to display!`);
+    console.log("Attempting to share round data to Firebase:", data);
+    set(ref(db, "quiz-display"), data)
+      .then(() => {
+        console.log("Successfully pushed round data to Firebase.");
+        toast.success(`Round ${round + 1} total sent to display!`);
+      })
+      .catch((error) => {
+        console.error("Firebase Sync Error:", error);
+        toast.error("Failed to share with cloud: " + error.message);
+      });
   }, [getRoundLeaderboard]);
 
   const shareSubRoundToDisplay = useCallback((round: number, subRound: number) => {
@@ -43,13 +51,26 @@ export default function QuizDashboard() {
       subRound,
       groups: lb.map((g) => ({ id: g.id, name: g.name, score: g.subRoundScore, rank: g.rank })),
     };
-    set(ref(db, "quiz-display"), data);
-    toast.success(`Round ${round + 1} Sub-Round ${subRound + 1} sent to display!`);
+    set(ref(db, "quiz-display"), data)
+      .then(() => {
+        console.log("Successfully pushed sub-round data to Firebase:", data);
+        toast.success(`Round ${round + 1} Sub-Round ${subRound + 1} sent to display!`);
+      })
+      .catch((error) => {
+        console.error("Firebase Sync Error:", error);
+        toast.error("Failed to share sub-round: " + error.message);
+      });
   }, [getSubRoundLeaderboard]);
 
   const stopSharing = useCallback(() => {
-    remove(ref(db, "quiz-display"));
-    toast.info("Sharing stopped. Display is on standby.");
+    remove(ref(db, "quiz-display"))
+      .then(() => {
+        console.log("Successfully cleared Firebase data.");
+        toast.info("Sharing stopped. Display is on standby.");
+      })
+      .catch((error) => {
+        console.error("Firebase Stop Error:", error);
+      });
   }, []);
 
   const shareFinalToDisplay = useCallback(() => {
@@ -59,8 +80,14 @@ export default function QuizDashboard() {
       numWinners,
       groups: lb.map((g) => ({ id: g.id, name: g.name, score: g.total, rank: g.rank })),
     };
-    set(ref(db, "quiz-display"), data);
-    toast.success("Final leaderboard sent to display!");
+    set(ref(db, "quiz-display"), data)
+      .then(() => {
+        console.log("Successfully pushed final leaderboard to Firebase.");
+        toast.success("Final leaderboard sent to display!");
+      })
+      .catch((error) => {
+        console.error("Firebase Final Sync Error:", error);
+      });
   }, [getLeaderboard, numWinners]);
 
   if (showFinal) {

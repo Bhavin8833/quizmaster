@@ -27,15 +27,28 @@ export default function Display() {
 
   useEffect(() => {
     const displayRef = ref(db, "quiz-display");
+    const connectedRef = ref(db, ".info/connected");
+
+    // Listen for connection status
+    onValue(connectedRef, (snap) => {
+      if (snap.val() === true) {
+        console.log("Display: Connected to Firebase Realtime Database");
+      } else {
+        console.warn("Display: Disconnected from Firebase");
+      }
+    });
     
     // Listen for real-time updates from Firebase
     const unsubscribe = onValue(displayRef, (snapshot) => {
       const val = snapshot.val();
+      console.log("Display: Received update from Firebase:", val);
       if (val) {
         setData(val);
       } else {
         setData(null);
       }
+    }, (error) => {
+      console.error("Display: Firebase Listener Error:", error);
     });
 
     return () => unsubscribe();
